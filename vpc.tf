@@ -63,42 +63,23 @@ resource "aws_subnet" "private" {
   )
 }
 
-
-##private Subnet ###
+##database Subnet ###
 resource "aws_subnet" "database" {
-  count = length(var.private_subnet_cidrs)
+  count = length(var.database_subnet_cidrs)
   availability_zone = local.az_names[count.index]
   map_public_ip_on_launch = true
   vpc_id = aws_vpc.main.id
-  cidr_block = var.private_subnet_cidrs[count.index]
+  cidr_block = var.database_subnet_cidrs[count.index]
 
   tags = merge(
     var.common_tags,
-    var.private_subnet_cidrs_tags,
+    var.database_subnet_cidr_tags,
     {
-        Name = "${local.resource_name}-private-${local.az_names[count.index]}"
+        Name = "${local.resource_name}-database-${local.az_names[count.index]}"
+        ## resource name is expense-dev-database-us-east-1a
+        ## resource name is expense-dev-database-us-east-1b
     }
   )
-}
-
-
-### Database subnet###
-resource "aws_subnet" "databse" {
-    count = length(var.database_subnet_cidrs)
-    availability_zone = local.az_names[count.index]
-    map_public_ip_on_launch = true
-    vpc_id = aws_vpc.main.id
-    cidr_block = var.database_subnet_cidrs[count.index]
-
-    tags = merge(
-        var.common_tags,
-        var.database_subnet_group_tags,
-        {
-            Name = "${local.resource_name}-database-${local.az_names[count.index]}" 
-            ## resource name is expense-dev-database-us-east-1a
-            ## resource name is expense-dev-database-us-east-1b
-        }
-    )
 }
 
 resource "aws_db_subnet_group" "default" {
@@ -113,7 +94,6 @@ resource "aws_db_subnet_group" "default" {
     }
   )
 }
-
 
 resource "aws_eip" "nat" {
   domain   = "vpc"
